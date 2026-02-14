@@ -22,6 +22,8 @@ The package is licensed under the GNU Lesser General Public [License v2.1](LICEN
 If you use RMB-CLE in your research or work, please consider citing this project using the following citation format.
 ```yml
 
+```
+
 ## Authors
 - [Seyedsaman (Saman) Emami](https://github.com/samanemami/)
 - [Daniel Hernández-Lobato](https://github.com/danielhernandezlobato)
