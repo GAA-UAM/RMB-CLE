@@ -17,6 +17,66 @@ The framework is model-agnostic and is instantiated in this repository using Lig
 ## License
 The package is licensed under the GNU Lesser General Public [License v2.1](LICENSE).
 
+# How to Run
+To generate toy datasets:
+```python
+python gen_data.py
+```
+
+This creates datasets in:
+```python
+toy_datasets/{num_clusters}clusters/batch{batch}/
+```
+
+## Load Data
+Synthetic Data
+```python
+import pandas as pd
+
+train_df = pd.read_csv("train_reg.csv")
+
+X = train_df.drop(columns=["Target"]).values
+y = train_df["Target"].values
+```
+
+Real Data
+```python
+from read_real_data import ReadData
+
+X_train, y_train, X_test, y_test = ReadData(
+    dataset="adult_gender",
+    random_state=42
+)
+```
+
+# Train RMB-CLE
+```python
+from rmb_cle import RMB_CLE
+from sklearn.ensemble import HistGradientBoostingRegressor
+
+model = RMB_CLE(
+    residual_model_cls=HistGradientBoostingRegressor,
+    task_model_cls=HistGradientBoostingRegressor,
+    residual_model_as_cls=True,
+    n_iter_1st=50,
+    n_iter_3rd=50,
+    max_iter=100,
+    learning_rate=0.1,
+    regression=True,
+    n_clusters="auto",
+    random_state=42
+)
+
+model.fit(X, y)
+predictions = model.predict(X)
+```
+Input Format (Important)
+```python
+[Feature1, Feature2, ..., FeatureD, TaskID]
+```
+- The last column must be the task identifier.
+- Tasks are internally remapped to consecutive indices
+
 
 ## Citations
 If you use RMB-CLE in your research or work, please consider citing this project using the following citation format.
