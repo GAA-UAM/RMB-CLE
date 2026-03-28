@@ -17,6 +17,18 @@ The framework is model-agnostic and is instantiated in this repository using Lig
 ## License
 The package is licensed under the GNU Lesser General Public [License v2.1](LICENSE).
 
+# Installation
+Clone the repository and install dependencies:
+```bash
+git clone https://github.com/your-repo/rmb-cle.git
+cd rmb-cle
+
+python -m venv venv
+source venv/bin/activate 
+
+pip install -r requirements.txt
+```
+
 # How to Run
 To generate toy datasets:
 ```python
