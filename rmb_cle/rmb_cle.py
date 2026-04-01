@@ -76,11 +76,14 @@ class RMB_CLE(BaseEstimator):
         n_clusters=None,
         random_state=111,
         task_to_cluster_input=None,
+        use_noisy_optimal_clusters=False,
     ):
         # Model classes / training controls
         self.residual_model_cls = residual_model_cls
         self.task_model_cls = task_model_cls
         self.residual_model_as_cls = residual_model_as_cls
+        self.use_noisy_optimal_clusters=use_noisy_optimal_clusters
+        self.cluster_noise_prob = 0.3
 
         # Iteration controls (used by task_model_cls / boosting-style learners)
         self.n_iter_1st = n_iter_1st
@@ -110,10 +113,32 @@ class RMB_CLE(BaseEstimator):
 
         # Reproducibility
         np.random.seed(self.random_state)
+        self.rng_ = np.random.default_rng(self.random_state)
 
         # Hierarchical clustering configuration
         self._linkage_method = "average"
         self._original_linkage = linkage
+        
+    def _pick_different_cluster(self, current_cluster, all_clusters):
+        other_clusters = [c for c in all_clusters if c != current_cluster]
+        if not other_clusters:
+            return current_cluster
+        return self.rng_.choice(other_clusters)
+    
+    def _inject_noise_into_mapping(self, task_to_cluster):
+        noisy_mapping = dict(task_to_cluster)
+        all_clusters = sorted(set(task_to_cluster.values()))
+
+        if len(all_clusters) <= 1:
+            return noisy_mapping
+
+        for task, true_cluster in task_to_cluster.items():
+            if self.rng_.random() < self.cluster_noise_prob:
+                noisy_mapping[task] = self._pick_different_cluster(
+                    true_cluster, all_clusters
+                )
+
+        return noisy_mapping
 
     def set_linkage_method(self, method_name):
         """Change the hierarchical clustering linkage method (e.g., 'average', 'complete', 'single')."""
@@ -246,12 +271,22 @@ class RMB_CLE(BaseEstimator):
         if not self.task_to_cluster_input:
             clusters = self.construct_task_clusters(X, y, task_ids)
         else:
-            self.ch_logger.info("[MTCoLE] Using provided task_to_cluster mapping.")
+            if self.use_noisy_optimal_clusters:
+                mapping_to_use = self._inject_noise_into_mapping(self.task_to_cluster_input)
+                self.ch_logger.info(
+                    f"[RMB-CLE] Noise injected into optimal clusters with p={self.cluster_noise_prob}."
+                )
+            else:
+                mapping_to_use = self.task_to_cluster_input
+                self.ch_logger.info("[RMB-CLE] Using clean optimal clusters.")
+                
             clusters = defaultdict(list)
-            for task, cluster_id in self.task_to_cluster_input.items():
+            self.task_to_cluster_ = {}
+            
+            for task, cluster_id in mapping_to_use.items():
                 clusters[cluster_id].append(task)
                 self.task_to_cluster_[task] = cluster_id
-
+            
         X_full = np.column_stack((X, task_ids))
 
         for cluster_id, tasks in clusters.items():
@@ -319,6 +354,7 @@ class RMB_CLE(BaseEstimator):
             "regression": self.regression,
             "n_clusters": self.n_clusters,
             "random_state": self.random_state,
+            "use_noisy_optimal_clusters": self.use_noisy_optimal_clusters,
         }
 
     def set_params(self, **params):
