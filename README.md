@@ -61,7 +61,7 @@ X_train, y_train, X_test, y_test = ReadData(
 )
 ```
 
-# Train RMB-CLE
+## Train RMB-CLE
 ```python
 from rmb_cle import RMB_CLE
 from sklearn.ensemble import HistGradientBoostingRegressor
@@ -90,18 +90,19 @@ Input Format (Important)
 - Tasks are internally remapped to consecutive indices
 
 
-## Citations
+# Citations
 If you use RMB-CLE in your research or work, please consider citing this project using the following citation format.
 ```yml
 @article{EMAMI2026134327,
-  title   = {Robust multi-task boosting using clustering and local ensembling},
-  journal = {Neurocomputing},
-  pages   = {134327},
-  year    = {2026},
-  issn    = {0925-2312},
-  doi     = {https://doi.org/10.1016/j.neucom.2026.134327},
-  url     = {https://www.sciencedirect.com/science/article/pii/S092523122601725X},
-  author  = {Seyedsaman Emami and Daniel HernÃ¡ndez-Lobato and Gonzalo MartÃ­nez-MuÃ±oz}
+    title         = {Robust multi-task boosting using clustering and local ensembling},
+    journal       = {Neurocomputing},
+    volume        = {698},
+    pages         = {134327},
+    year          = {2026},
+    issn          = {0925-2312},
+    doi           = {https://doi.org/10.1016/j.neucom.2026.134327},
+    url           = {https://www.sciencedirect.com/science/article/pii/S092523122601725X},
+    author        = {Seyedsaman Emami and Daniel Hern\'{a}ndez-Lobato and Gonzalo Mart\'{\i}nez-Mu\~{n}oz}
 }
 ```
 
